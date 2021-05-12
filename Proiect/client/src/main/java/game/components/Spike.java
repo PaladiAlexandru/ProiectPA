@@ -66,8 +66,22 @@ public class Spike extends JPanel {
 
     }
 
+    public void drawBDeadPiece(){
+        int y=0;
+        for(Piece piece:board.bDeadPieces){
+
+            board.graphics.setColor(piece.getColor());
+            board.graphics.fillOval(Board.H-Board.margin,y,piece.getPwidth(),piece.getPheight());
+            y = y + piece.getPheight();
+        }
+    }
+
     public void eatPiece(int index) {
-        
+        if(pieces.get(index).getColor() == Color.BLUE){
+            board.bDeadPieces.add(pieces.get(index));
+            drawBDeadPiece();
+            repaint();
+        }
         pieces.remove(index);
         repaintSpike();
     }
