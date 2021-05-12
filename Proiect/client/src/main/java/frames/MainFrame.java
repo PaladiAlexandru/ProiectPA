@@ -24,5 +24,11 @@ public class MainFrame extends JFrame  {
         
     }
 
+    public Board getBoard() {
+        return board;
+    }
 
+    public void setBoard(Board board) {
+        this.board = board;
+    }
 }

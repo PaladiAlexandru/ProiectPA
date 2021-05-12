@@ -11,6 +11,7 @@ public class Main {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setUndecorated(true);
         frame.setVisible(true);
+
 //        MyClient client = new MyClient();
 //        client.connect();
 
