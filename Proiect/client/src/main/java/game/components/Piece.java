@@ -9,17 +9,17 @@ public class Piece extends JPanel{
     private int id;
     private Color color;
     private int pwidth;
-    private int pheight;
 
 
-    public Piece(Board board, Spike spike, int id, Color color, int width, int height) {
+
+    public Piece(Board board, Spike spike, int id, Color color, int width) {
 
         this.board = board;
         this.spike = spike;
         this.id = id;
         this.color = color;
         this.pwidth = width;
-        this.pheight = height;
+
     }
 
     public Board getBoard() {
@@ -58,18 +58,8 @@ public class Piece extends JPanel{
         this.pwidth = pwidth;
     }
 
-    public int getPheight() {
-        return pheight;
-    }
 
-    public void setPheight(int pheight) {
-        this.pheight = pheight;
-    }
 
-    public void draw(){
-        board.graphics.setColor(color);
-        board.graphics.fillOval(spike.getSX(),spike.getSY(),50,50);
-    }
 
 
     @Override

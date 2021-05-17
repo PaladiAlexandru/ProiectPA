@@ -6,43 +6,29 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
-
+/**
+ * Clasa responsabilă cu conectarea clientului la server
+ */
 public class MyClient {
 
-    private boolean myTurn= false;
-    private boolean stillPlaying = true;
+    PrintWriter out;
+    BufferedReader in;
+
+    public MyClient() {
+    }
+
+    /**
+     * Se conectează la server și setează output-ul și input-ul
+     */
     public void connect() {
-        boolean running = true;
+
         String serverAddress = "127.0.0.1";
         int PORT = 8101;
-        Scanner sc = new Scanner(System.in);
-        try (
-                Socket socket = new Socket(serverAddress, PORT);
-                PrintWriter out =
-                        new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()))) {
-            if(in.readLine().equals("1")){
-                myTurn = true;
-            }
-            while (stillPlaying){
-                if(myTurn){
-                    System.out.println("Enter the move :");
-                    String move = sc.nextLine();
-                    sendTo(out,move);
-                    myTurn=false;
-                }
-                String response = in.readLine();
-                System.out.println(response);
-                myTurn=true;
-            }
-            String response = in.readLine();
-            System.out.println(response);
-
-
-
+        try {
+            Socket socket = new Socket(serverAddress, PORT);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         } catch (UnknownHostException e) {
             System.err.println("No server listening... " + e);
@@ -50,9 +36,23 @@ public class MyClient {
             e.printStackTrace();
         }
     }
-    private void sendTo(PrintWriter to, String message){
-        to.println(message);
-        to.flush();
 
+
+
+    public void setOut(PrintWriter out) {
+        this.out = out;
+    }
+
+    public void setIn(BufferedReader in) {
+        this.in = in;
+    }
+
+
+    public PrintWriter getOut() {
+        return out;
+    }
+
+    public BufferedReader getIn() {
+        return in;
     }
 }

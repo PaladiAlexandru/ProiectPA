@@ -1,17 +1,19 @@
 package game.components;
 
 import frames.MainFrame;
+import game.logic.listeners.DiceListener;
 
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Board extends JPanel implements MouseListener {
+/**
+ * Clasa care reprezintă tabla de joc
+ */
+public class Board extends JPanel  {
     final MainFrame frame;
     final static int W = 1000, H = 800,margin = 30;
     BufferedImage image;
@@ -19,11 +21,12 @@ public class Board extends JPanel implements MouseListener {
     List<Spike> spikes;
     List<Piece> wDeadPieces;
     List<Piece> bDeadPieces;
+    Spike spikeFrom;    //for when you move
+    Spike spikeTo;
+    Dice dice;
+    JLabel value;
 
 
-    public static int getMargin() {
-        return margin;
-    }
 
 
 
@@ -34,13 +37,36 @@ public class Board extends JPanel implements MouseListener {
         this.frame = frame;
         init();
     }
+
+    /**
+     * Se creează toate componentele necesare unui joc
+     */
     private void init(){
         createOffscreenImage();
         addSpikes();
         addPieces();
+        addDice();
 
     }
 
+    /**
+     * Adaugăm un zar care ia valori random intre 1, si 6
+     */
+    private void addDice() {
+        JPanel panel = new JPanel();
+
+        JButton diceBtn = new JButton("Roll");
+        value = new JLabel("Value: 0, 0");
+        dice = new Dice();
+        diceBtn.addActionListener(new DiceListener(dice,value));
+        panel.add(diceBtn);
+        panel.add(value);
+        add(panel);
+    }
+
+    /**
+     * Se deseneaza și se adaugă la lista de spike-uri fiecare spike în parte
+     */
     private void addSpikes() {
         Color marginColor = Color.darkGray;
         int heightSpike = 300;
@@ -80,45 +106,38 @@ public class Board extends JPanel implements MouseListener {
 
     }
 
-
+    /**
+     * Adaugăm piesele inițiale pe fiecare spike in parte
+     */
     private void addPieces(){
         Color white = Color.BLUE;
         Color black = Color.GREEN;
+        int pieceSize = 50;
         for(int i=0;i<=4;i++)
-            spikes.get(0).addPiece(i,black);
+            spikes.get(0).addPiece(new Piece(this, spikes.get(0), i, black, pieceSize));
         for(int i=5;i<=7;i++)
-            spikes.get(4).addPiece(i,white);
+            spikes.get(4).addPiece(new Piece(this, spikes.get(4), i, white, pieceSize));
         for(int i=8;i<=12;i++)
-            spikes.get(6).addPiece(i,white);
+            spikes.get(6).addPiece(new Piece(this, spikes.get(6), i, white, pieceSize));
         for(int i=13;i<=14;i++)
-            spikes.get(11).addPiece(i,black);
+            spikes.get(11).addPiece(new Piece(this, spikes.get(11), i, black, pieceSize));
         for(int i=15;i<=19;i++)
-            spikes.get(12).addPiece(i,white);
+            spikes.get(12).addPiece(new Piece(this, spikes.get(12), i, white, pieceSize));
         for(int i=20;i<=22;i++)
-            spikes.get(16).addPiece(i,black);
+            spikes.get(16).addPiece(new Piece(this, spikes.get(16), i, black, pieceSize));
         for(int i=23;i<=27;i++)
-            spikes.get(18).addPiece(i,black);
+            spikes.get(18).addPiece(new Piece(this, spikes.get(18), i, black, pieceSize));
         for(int i=28;i<=29;i++)
-            spikes.get(23).addPiece(i,white);
+            spikes.get(23).addPiece(new Piece(this, spikes.get(23), i, white, pieceSize));
 
     }
-    private boolean onTheBoard(int x,int y){
-        if(x<Board.W&&y<Board.H)
-            return true;
-        return false;
-    }
-    private boolean onTheSpike(int x,int y,Spike spike){
-        if(topSpike(spike)){
-            return x>spike.getSX()&&x < spike.getSX() + spike.getW() && y> spike.getY() &&y < spike.getSY() + spike.getH();
-        }
-        return x < spike.getSX() + spike.getW() && x > spike.getSX()&& y < spike.getSY() && y > spike.getSY() - spike.getH();
 
-
-    }
-    private boolean topSpike(Spike spike){
-        return spike.getSY() == Board.margin;
-    }
-
+    /**
+     * Deseneaza marginile tablei de joc
+     * @param margin - marginea dorită
+     * @param color - culoarea dorită
+     * @param widthSpike - lățimea spike-urilor
+     */
     private void drawMargins(int margin,Color color,int widthSpike) {
         int rightWidth =margin+12*widthSpike+margin;
         graphics.setColor(color);
@@ -129,10 +148,20 @@ public class Board extends JPanel implements MouseListener {
 
     }
 
+    /**
+     * Verifica daca i este la mijlocul tablei
+     * @param i - valoarea care vrem sa fie verificată
+     * @param width - lățimea spike-urilor
+     * @param margin - marginea tablei de joc
+     * @return
+     */
     private boolean isMiddle(int i, int width, int margin) {
         return i - margin == width * 6;
     }
 
+    /**
+     * Se creează suprafața pe care urmează să se deseneze tabla
+     */
     public void createOffscreenImage() {
         image = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
         graphics = image.createGraphics();
@@ -140,7 +169,11 @@ public class Board extends JPanel implements MouseListener {
         graphics.fillRect(0, 0, W, H);
     }
 
-
+    /**
+     * Deseneaza linia de mijloc a tablei de joc
+     * @param x - poziția unde să înceapă linia
+     * @param color - culoarea liniei
+     */
     private void drawMiddleLine(int x, Color color) {
         graphics.setColor(color);
         graphics.fillRect(x-10, 0, 20, H);
@@ -156,6 +189,42 @@ public class Board extends JPanel implements MouseListener {
         return H;
     }
 
+    public static int getMargin() {
+        return margin;
+    }
+
+    public List<Spike> getSpikes() {
+        return spikes;
+    }
+
+    public void setSpikes(List<Spike> spikes) {
+        this.spikes = spikes;
+    }
+
+    public Spike getSpikeFrom() {
+        return spikeFrom;
+    }
+
+    public void setSpikeFrom(Spike spikeFrom) {
+        this.spikeFrom = spikeFrom;
+    }
+
+    public Spike getSpikeTo() {
+        return spikeTo;
+    }
+
+    public Dice getDice() {
+        return dice;
+    }
+
+    public void setDice(Dice dice) {
+        this.dice = dice;
+    }
+
+    public void setSpikeTo(Spike spikeTo) {
+        this.spikeTo = spikeTo;
+    }
+
     @Override
     public void update(Graphics g) {
     }
@@ -166,45 +235,6 @@ public class Board extends JPanel implements MouseListener {
     }
 
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        System.out.println("Xc: " + e.getX());
-        System.out.println("Yc: " + e.getY());
-        System.out.println("cacat");
-        int x = e.getX();
-        int y = e.getY();
-        if(onTheBoard(x,y)){
-            System.out.println("Pe tabla");
-            for (Spike spike:spikes){
-                if(onTheSpike(x,y,spike)){
-                    System.out.println("Pe spike " + spike.getId());
 
-                    spike.eatPiece(0);
-                    break;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
 
 }

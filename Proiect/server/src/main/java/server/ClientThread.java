@@ -8,51 +8,77 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * Un thread pentru a comunica cu  doi clienții
+ */
 public class ClientThread extends Thread {
     private Socket player1;
     private Socket player2;
 
-    public ClientThread(Socket player1,Socket player2) {
+    public ClientThread(Socket player1, Socket player2) {
         this.player1 = player1;
         this.player2 = player2;
     }
 
+    /**
+     * Cât timp nu primește "4" de la un client serverul ia mutarea de la un jucător și o trimite oponentului său
+     */
     public void run() {
         try {
 
             BufferedReader in1 = new BufferedReader(
                     new InputStreamReader(player1.getInputStream()));
 
-//            String player1Move = in2.readLine();
             PrintWriter out1 = new PrintWriter(player1.getOutputStream());
 
             BufferedReader in2 = new BufferedReader(
                     new InputStreamReader(player2.getInputStream()));
-//            String player2Move = in1.readLine();
             PrintWriter out2 = new PrintWriter(player2.getOutputStream());
             boolean stillPlaying = true;
-            int count= 0;
-            // Ii spunem playerului1 că este primul player
-            sendTo(out1,"1");
-            sendTo(out2,"0");
-
-            while(stillPlaying){
 
 
-                String player1Move = in1.readLine();
-                String raspuns2 = "Oponent move: " + player1Move;
-                sendTo(out2,raspuns2);
-                String player2Move = in2.readLine();
-                String raspuns1;
-                raspuns1 = "Oponent move: " + player2Move;
-                out1.println(raspuns1);
-                out1.flush();
-                if(count==4){
+            // Ii spunem jucatorului 1 că are prima mutare
+            sendTo(out1, "3");
+            sendTo(out2, "2");
+
+            while (stillPlaying) {
+
+
+                String player1MoveFromX = in1.readLine();
+                String player1MoveFromY = in1.readLine();
+                String player1MoveToX = in1.readLine();
+                String player1MoveToY = in1.readLine();
+                if (player1MoveFromX.equals("4")) {
                     stillPlaying = false;
-                }
-                count++;
-            }
+                    sendTo(out2, player1MoveFromX);
+                    sendTo(out2, player1MoveFromY);
+                    sendTo(out2, player1MoveToX);
+                    sendTo(out2, player1MoveToY);
+                } else {
+                    sendTo(out2, player1MoveFromX);
+                    sendTo(out2, player1MoveFromY);
+                    sendTo(out2, player1MoveToX);
+                    sendTo(out2, player1MoveToY);
+                    String player2MoveFromX = in2.readLine();
+                    String player2MoveFromY = in2.readLine();
+                    String player2MoveToX = in2.readLine();
+                    String player2MoveToY = in2.readLine();
+                    if (player2MoveFromX.equals("4")) {
+                        stillPlaying = false;
+                        sendTo(out1, player2MoveFromX);
+                        sendTo(out1, player2MoveFromY);
+                        sendTo(out1, player2MoveToX);
+                        sendTo(out1, player2MoveToY);
+                    } else {
+                        sendTo(out1, player2MoveFromX);
+                        sendTo(out1, player2MoveFromY);
+                        sendTo(out1, player2MoveToX);
+                        sendTo(out1, player2MoveToY);
 
+                    }
+                }
+
+            }
 
 
         } catch (IOException e) {
@@ -66,7 +92,14 @@ public class ClientThread extends Thread {
             }
         }
     }
-    private void sendTo(PrintWriter to, String message){
+
+    /**
+     * Trimite un mesaj către un client
+     * @param to - clientul către care se trimite mesajul
+     * @param message - mesajul trimis
+     */
+    private void sendTo(PrintWriter to, String message) {
+        System.out.println("Trimit: " + message);
         to.println(message);
         to.flush();
 

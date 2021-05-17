@@ -39,56 +39,84 @@ public class Spike extends JPanel {
 
     }
 
-    public void addPiece(int id, Color color) {
-        Piece piece = new Piece(board, this, id, color, 50, 50);
+    public void addPiece(Piece piece) {
+
         this.pieces.add(piece);
         drawPieces(this.sx, this.sy);
     }
 
+    public void removePiece() {
+        this.pieces.remove(0);
+        repaintSpike();
+    }
+
+    public boolean hasPieces() {
+        return !this.pieces.isEmpty();
+    }
+
     public void drawPieces(int x, int y) {
         // If we are drawing the bottom pieces
-        if (y == Board.getH() - Board.getMargin()) {
+        if (y == Board.getH() - Board.margin) {
             //To be on the table
-            y = y - pieces.get(0).getPheight();
+            y = y - pieces.get(0).getPwidth();
             for (Piece piece : pieces) {
                 board.graphics.setColor(piece.getColor());
-                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPheight());
-                y = y - piece.getPheight();
+                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPwidth());
+                y = y - piece.getPwidth();
             }
             // If we are drawing the top pieces
         } else {
             for (Piece piece : pieces) {
                 board.graphics.setColor(piece.getColor());
-                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPheight());
-                y = y + piece.getPheight();
+                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPwidth());
+                y = y + piece.getPwidth();
             }
         }
 
     }
 
-    public void drawBDeadPiece(){
-        int y=0;
-        for(Piece piece:board.bDeadPieces){
+    public boolean onePiece() {
+        return this.getPieces().size() == 1;
+    }
+
+    public void drawBDeadPiece() {
+        int y = 0;
+        for (Piece piece : board.bDeadPieces) {
 
             board.graphics.setColor(piece.getColor());
-            board.graphics.fillOval(Board.H-Board.margin,y,piece.getPwidth(),piece.getPheight());
-            y = y + piece.getPheight();
+            board.graphics.fillOval(Board.H - Board.margin, y, piece.getPwidth(), piece.getPwidth());
+            y = y + piece.getPwidth();
+        }
+    }
+    public void drawWDeadPiece() {
+        int y = Board.W - Board.margin -225;
+        for (Piece piece : board.wDeadPieces) {
+
+            board.graphics.setColor(piece.getColor());
+            board.graphics.fillOval(Board.H - Board.margin, y, piece.getPwidth(), piece.getPwidth());
+            y = y - piece.getPwidth();
         }
     }
 
     public void eatPiece(int index) {
-        if(pieces.get(index).getColor() == Color.BLUE){
+        if (pieces.get(index).getColor() == Color.BLUE) {
             board.bDeadPieces.add(pieces.get(index));
             drawBDeadPiece();
-            repaint();
+        }else{
+            System.out.println("INTRU DRAW GREEN");
+            System.out.println(pieces.get(index).getColor());
+            board.wDeadPieces.add(pieces.get(index));
+            drawWDeadPiece();
         }
         pieces.remove(index);
         repaintSpike();
     }
 
-    public void clearSpike(int x, int y){
+
+
+    public void clearSpike(int x, int y) {
         this.board.graphics.setColor(Color.white);
-        this.board.graphics.fillRect(x,y,w-5,h);
+        this.board.graphics.fillRect(x, y, w - 5, h);
         this.board.repaint();
     }
 
@@ -97,23 +125,26 @@ public class Spike extends JPanel {
 
         int x = this.sx;
         int y = this.sy;
-        if (y == Board.getH() - Board.getMargin()) {
+        if (y == Board.getH() - Board.margin) {
 
-            clearSpike(x,y-h);
+            clearSpike(x, y - h);
             draw();
-            y = y - pieces.get(0).getPheight();
-            for (Piece piece : pieces) {
-                board.graphics.setColor(piece.getColor());
-                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPheight());
-                y = y - piece.getPheight();
+            if(this.hasPieces()){
+                y = y - pieces.get(0).getPwidth();
+                for (Piece piece : pieces) {
+                    board.graphics.setColor(piece.getColor());
+                    board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPwidth());
+                    y = y - piece.getPwidth();
+                }
             }
+
         } else {
-            clearSpike(x,y);
+            clearSpike(x, y);
             draw();
             for (Piece piece : pieces) {
                 board.graphics.setColor(piece.getColor());
-                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPheight());
-                y = y + piece.getPheight();
+                board.graphics.fillOval(x, y, piece.getPwidth(), piece.getPwidth());
+                y = y + piece.getPwidth();
             }
         }
         repaint();
